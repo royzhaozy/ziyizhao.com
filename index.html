@@ -42,7 +42,6 @@
 
   /* ---------- nameplate header ---------- */
   header.nameplate{
-    border-bottom:1px solid var(--line);
     padding:48px 0 28px;
   }
   .plate-row{
@@ -73,22 +72,53 @@
   .contact-row span::before{content:"· "; opacity:.5;}
   .contact-row span:first-child::before{content:none;}
 
-  /* ---------- boot sequence ---------- */
-  #boot{
+  /* ---------- boot sequence : CRT terminal ---------- */
+  .boot-outer{
+    padding-top:16px;
+  }
+  .boot-outer .wrap{
+    border-bottom:1px solid var(--line);
+    padding-bottom:40px;
+  }
+  .crt{
+    position:relative;
+    height:260px;
+    overflow:hidden;
+    background:#03110A;
+    border-radius:8px;
+    box-shadow:
+      0 0 0 1px var(--line),
+      inset 0 0 40px rgba(61,220,151,.12),
+      inset 0 0 2px rgba(61,220,151,.4);
+    padding:20px 24px;
     font-family:var(--mono);
     font-size:13px;
+    line-height:1.55;
     color:var(--accent);
-    padding-top:18px;
-    padding-bottom:18px;
-    border-bottom:1px solid var(--line);
+    text-shadow:0 0 5px rgba(61,220,151,.65), 0 0 1px rgba(61,220,151,.9);
     white-space:pre-wrap;
-    min-height:1.6em;
   }
-  #boot .ok{color:var(--accent);}
-  #boot .warn{color:var(--accent-2);}
-  #boot .cursor{display:inline-block; width:8px; background:var(--accent); margin-left:2px; animation:blink 1s steps(1) infinite;}
-  @keyframes blink{50%{opacity:0;}}
-  #boot .breathe{color:var(--accent); animation:breathe 2.8s ease-in-out infinite;}
+  .crt::before{
+    content:"";
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 2px,
+      rgba(0,0,0,.35) 3px
+    );
+    pointer-events:none;
+    mix-blend-mode:multiply;
+  }
+  .crt::after{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%);
+    pointer-events:none;
+  }
+  .crt .ok{color:var(--accent);}
+  .crt .warn{color:var(--accent-2);}
+  .crt .breathe{color:var(--accent); animation:breathe 2.8s ease-in-out infinite; position:relative; z-index:1;}
   @keyframes breathe{0%,100%{opacity:1;}50%{opacity:.35;}}
 
   /* ---------- section scaffolding ---------- */
@@ -201,7 +231,11 @@
   </div>
 </header>
 
-<div id="boot" class="wrap" aria-hidden="true"></div>
+<div class="boot-outer">
+  <div class="wrap">
+    <div class="crt" id="boot" aria-hidden="true"></div>
+  </div>
+</div>
 
 <main class="wrap">
 
@@ -358,7 +392,6 @@
   var i = 0;
   function typeLine(){
     if(i >= lines.length){
-      boot.innerHTML += '<span class="cursor"></span>';
       return;
     }
     var label = lines[i][0];
