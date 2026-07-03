@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roy Zhao — Firmware Design Developer</title>
+<meta name="description" content="Roy Zhao, Firmware Design Developer in Vancouver, BC. UEFI/BIOS firmware for x86 and ARM platforms.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0E12;
+    --panel:#10161C;
+    --line:#1E2830;
+    --text:#D8E1E8;
+    --text-dim:#7C8B99;
+    --accent:#3DDC97;
+    --accent-2:#FFB300;
+    --mono:'IBM Plex Mono', ui-monospace, monospace;
+    --sans:'IBM Plex Sans', system-ui, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important;}
+  }
+
+  a{color:var(--accent); text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  a:focus-visible, button:focus-visible{outline:2px solid var(--accent-2); outline-offset:3px;}
+
+  .wrap{max-width:840px; margin:0 auto; padding:0 24px;}
+
+  /* ---------- nameplate header ---------- */
+  header.nameplate{
+    border-bottom:1px solid var(--line);
+    padding:48px 0 28px;
+  }
+  .plate-row{
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;
+  }
+  .plate-id{font-family:var(--mono); font-size:12px; letter-spacing:.12em; color:var(--text-dim); text-transform:uppercase;}
+  h1{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:clamp(28px,5vw,42px);
+    margin:6px 0 4px;
+    letter-spacing:-0.01em;
+  }
+  .role{
+    font-family:var(--mono);
+    color:var(--accent);
+    font-size:14px;
+    letter-spacing:.06em;
+  }
+  .contact-row{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--text-dim);
+    display:flex; gap:18px; flex-wrap:wrap; margin-top:14px;
+  }
+  .contact-row a{color:var(--text-dim);}
+  .contact-row a:hover{color:var(--accent);}
+  .contact-row span::before{content:"· "; opacity:.5;}
+  .contact-row span:first-child::before{content:none;}
+
+  /* ---------- boot sequence ---------- */
+  #boot{
+    font-family:var(--mono);
+    font-size:13px;
+    color:var(--accent);
+    padding:18px 0;
+    border-bottom:1px solid var(--line);
+    white-space:pre-wrap;
+    min-height:1.6em;
+  }
+  #boot .ok{color:var(--accent);}
+  #boot .warn{color:var(--accent-2);}
+  #boot .cursor{display:inline-block; width:8px; background:var(--accent); margin-left:2px; animation:blink 1s steps(1) infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* ---------- section scaffolding ---------- */
+  section{padding:40px 0; border-bottom:1px solid var(--line);}
+  section:last-of-type{border-bottom:none;}
+  .sec-head{
+    display:flex; align-items:baseline; gap:12px; margin-bottom:22px;
+  }
+  .sec-tag{
+    font-family:var(--mono); font-size:11px; color:var(--text-dim); letter-spacing:.14em;
+  }
+  h2{
+    font-family:var(--mono);
+    font-size:15px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    margin:0;
+    color:var(--text);
+  }
+  h2::before{content:"// "; color:var(--accent);}
+
+  /* ---------- skills as bus grid ---------- */
+  .bus{margin-bottom:20px;}
+  .bus-label{
+    font-family:var(--mono); font-size:11px; color:var(--text-dim); letter-spacing:.1em; margin-bottom:8px;
+  }
+  .pins{display:flex; flex-wrap:wrap; gap:8px;}
+  .pin{
+    font-family:var(--mono); font-size:12.5px;
+    border:1px solid var(--line);
+    background:var(--panel);
+    color:var(--text);
+    padding:5px 10px;
+    border-radius:3px;
+  }
+
+  /* ---------- experience / datasheet entries ---------- */
+  .entry{margin-bottom:30px;}
+  .entry:last-child{margin-bottom:0;}
+  .entry-head{
+    display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap;
+    border-bottom:1px dashed var(--line);
+    padding-bottom:8px; margin-bottom:10px;
+  }
+  .entry-title{font-weight:600; font-size:16px;}
+  .entry-title .company{color:var(--accent);}
+  .entry-meta{
+    font-family:var(--mono); font-size:11.5px; color:var(--text-dim); text-align:right; letter-spacing:.03em;
+  }
+  ul.notes{margin:0; padding-left:1.1em;}
+  ul.notes li{margin-bottom:8px; color:var(--text); font-size:14.5px;}
+  ul.notes li::marker{color:var(--accent); font-family:var(--mono);}
+
+  /* ---------- projects as compatibility table ---------- */
+  .proj{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:18px 20px;
+    margin-bottom:16px;
+  }
+  .proj:last-child{margin-bottom:0;}
+  .proj-head{
+    display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; align-items:baseline;
+    margin-bottom:10px;
+  }
+  .proj-name{font-weight:600; font-size:15px;}
+  .proj-rev{
+    font-family:var(--mono); font-size:11px; color:var(--accent-2); letter-spacing:.06em;
+  }
+  .proj-date{font-family:var(--mono); font-size:11.5px; color:var(--text-dim);}
+
+  /* ---------- education ---------- */
+  .edu-row{display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  .edu-school{color:var(--accent);}
+
+  footer{
+    padding:36px 0 60px;
+    text-align:center;
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--text-dim);
+  }
+  footer a{color:var(--text-dim);}
+  footer a:hover{color:var(--accent);}
+
+  @media (max-width:600px){
+    .entry-meta{text-align:left;}
+    .entry-head{flex-direction:column; align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<header class="nameplate">
+  <div class="wrap">
+    <div class="plate-id">DEV/ROY-ZHAO &nbsp;·&nbsp; REV 2026.1</div>
+    <div class="plate-row">
+      <div>
+        <h1>Roy Zhao</h1>
+        <div class="role">FIRMWARE DESIGN DEVELOPER</div>
+      </div>
+    </div>
+    <div class="contact-row">
+      <span>Vancouver, BC, Canada</span>
+      <span><a href="mailto:Hello@ZiyiZhao.com">Hello@ZiyiZhao.com</a></span>
+      <span><a href="tel:+17789294626">(778) 929-4626</a></span>
+      <span><a href="https://linkedin.com/in/roy-zhao" target="_blank" rel="noopener">linkedin.com/in/roy-zhao</a></span>
+    </div>
+  </div>
+</header>
+
+<div id="boot" class="wrap" aria-hidden="true"></div>
+
+<main class="wrap">
+
+  <section id="skills">
+    <div class="sec-head"><span class="sec-tag">0x01</span><h2>Skills</h2></div>
+
+    <div class="bus">
+      <div class="bus-label">SOFTWARE BUS</div>
+      <div class="pins">
+        <span class="pin">C/C++</span><span class="pin">UEFI</span><span class="pin">Bash</span>
+        <span class="pin">Python</span><span class="pin">Swift</span><span class="pin">Java</span>
+        <span class="pin">HTML</span><span class="pin">CSS</span>
+      </div>
+    </div>
+
+    <div class="bus">
+      <div class="bus-label">HARDWARE / INTERFACE BUS</div>
+      <div class="pins">
+        <span class="pin">PCIe</span><span class="pin">I²C / I3C</span><span class="pin">GPIO</span>
+        <span class="pin">QSGMII</span><span class="pin">x86 (Intel/AMD)</span><span class="pin">ARM</span>
+        <span class="pin">Bluetooth</span>
+      </div>
+    </div>
+
+    <div class="bus">
+      <div class="bus-label">TOOLING BUS</div>
+      <div class="pins">
+        <span class="pin">Git</span><span class="pin">SVN</span><span class="pin">Mercurial</span>
+        <span class="pin">Linux Kernel</span><span class="pin">Oscilloscope</span><span class="pin">Wireshark</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience">
+    <div class="sec-head"><span class="sec-tag">0x02</span><h2>Experience</h2></div>
+
+    <div class="entry">
+      <div class="entry-head">
+        <div class="entry-title">Firmware Design Developer — <span class="company">Fortinet</span></div>
+        <div class="entry-meta">Jan 2020 – Present<br>Burnaby, BC</div>
+      </div>
+      <ul class="notes">
+        <li>Develop and maintain UEFI/BIOS firmware for multiple FortiGate platforms across x86 and ARM, integrating custom and third-party components via PCIe, I²C, and QSGMII while ensuring platform stability across diverse hardware configs.</li>
+        <li>Debug and resolve firmware issues by tuning chipset and interface settings in collaboration with Intel/AMD/Insyde (e.g., enabling chipset features, PCIe link training, GPIO assignments) to improve reliability and performance.</li>
+        <li>Evaluate chipset variants on vendor Customer Reference Boards; perform stress and stability testing, analyze results, and deliver reports that inform part selection and platform design decisions.</li>
+        <li>Build internal test tools and Linux-based OS images to accelerate validation and regression.</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <div class="entry-head">
+        <div class="entry-title">Firmware Developer (Co-op) — <span class="company">Avigilon (Motorola Solutions)</span></div>
+        <div class="entry-meta">Sep 2018 – Apr 2019<br>Vancouver, BC</div>
+      </div>
+      <ul class="notes">
+        <li>Improved device performance and stability by resolving embedded Linux Zeroconf IP conflict and video frame-rate issues.</li>
+        <li>Modernized code to C++11/14, replacing third-party libs with STL; reduced linked objects by ~10% in clean builds.</li>
+        <li>Updated web UI for PTZ configuration (HTML/CSS) using existing APIs; integrated with on-device C++ server.</li>
+      </ul>
+    </div>
+
+    <div class="entry">
+      <div class="entry-head">
+        <div class="entry-title">Firmware Developer (Co-op) — <span class="company">Netgear Canada</span></div>
+        <div class="entry-meta">Jan 2017 – Aug 2017<br>Richmond, BC</div>
+      </div>
+      <ul class="notes">
+        <li>Implemented a temperature-sensing subsystem in C++ on a manufacturing prototype and integrated it into the final product.</li>
+        <li>Developed Android and iOS applications for internal testing in Java and Swift, and communicated with the prototype using Bluetooth LE and MQTT.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="sec-head"><span class="sec-tag">0x03</span><h2>Projects</h2></div>
+
+    <div class="proj">
+      <div class="proj-head">
+        <div class="proj-name">BIOS — FortiGate Rugged 50G/70G series</div>
+        <div class="proj-date">Nov 2023 – Apr 2024</div>
+      </div>
+      <div class="proj-rev">PLATFORM: FORTINET ARM SoC</div>
+      <ul class="notes">
+        <li>Developed BIOS for Fortinet ARM SoC. Collaborated with hardware and OS teams to configure GPIO and I²C interfaces across multiple prototype platforms.</li>
+        <li>Developed QA test parameters and validated hardware/software stability, releasing firmware updates to ensure RF and regulatory compliance across customer use cases.</li>
+      </ul>
+    </div>
+
+    <div class="proj">
+      <div class="proj-head">
+        <div class="proj-name">BIOS — FortiGate 1000F/600F series</div>
+        <div class="proj-date">Nov 2022 – Jun 2023</div>
+      </div>
+      <div class="proj-rev">PLATFORM: INTEL TATLOW CHIPSET</div>
+      <ul class="notes">
+        <li>Developed and customized BIOS for FG600F and FG1000F based on the Intel Tatlow chipset. Adapted vendor reference code and investigated issues using Customer Reference Boards.</li>
+        <li>Integrated peripheral components via PCIe and I²C interfaces, tuning BIOS parameters and interface configurations with vendor support to ensure long-term stability under stress (≥99.9% boot success rate).</li>
+      </ul>
+    </div>
+
+    <div class="proj">
+      <div class="proj-head">
+        <div class="proj-name">BIOS — FortiGate 3000F/3500F series</div>
+        <div class="proj-date">May 2020 – Aug 2021</div>
+      </div>
+      <div class="proj-rev">PLATFORM: AMD ROME CHIPSET</div>
+      <ul class="notes">
+        <li>Performed validation and stress test using the AMD Rome chipset and Customer Reference Board. Compared performance across processor SKUs within the product line.</li>
+        <li>Assisted in developing and customizing BIOS for FG3000F and FG3500F platforms, designing and executing functional and stability tests to ensure long-term performance.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="education">
+    <div class="sec-head"><span class="sec-tag">0x04</span><h2>Education</h2></div>
+    <div class="edu-row">
+      <div><span class="edu-school">Simon Fraser University</span> — B.A.Sc., Computer Engineering</div>
+      <div class="entry-meta" style="text-align:right">Sep 2013 – Dec 2019<br>Canada</div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    EOF — thanks for reading &nbsp;·&nbsp;
+    <a href="mailto:Hello@ZiyiZhao.com">Hello@ZiyiZhao.com</a> &nbsp;·&nbsp;
+    <a href="https://linkedin.com/in/roy-zhao" target="_blank" rel="noopener">LinkedIn</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var boot = document.getElementById('boot');
+  var lines = [
+    ['CPU ......... ', 'ok'],
+    ['MEM ......... ', 'ok'],
+    ['PCIe LINK ... ', 'ok'],
+    ['GPIO MAP .... ', 'ok'],
+    ['I2C BUS ..... ', 'ok'],
+    ['SKILLS ...... ', 'ok'],
+    ['EXPERIENCE .. ', 'ok'],
+    ['PROJECTS .... ', 'ok'],
+    ['', ''],
+    ['BOOT COMPLETE — WELCOME', 'warn']
+  ];
+
+  if(reduce){
+    boot.textContent = 'BOOT COMPLETE — WELCOME';
+    return;
+  }
+
+  var i = 0;
+  function typeLine(){
+    if(i >= lines.length){
+      boot.innerHTML += '<span class="cursor"></span>';
+      return;
+    }
+    var label = lines[i][0];
+    var cls = lines[i][1];
+    var span = document.createElement('div');
+    boot.appendChild(span);
+    var text = label + (cls ? cls.toUpperCase() : '');
+    var j = 0;
+    var interval = setInterval(function(){
+      span.textContent = text.slice(0, j+1);
+      j++;
+      if(j >= text.length){
+        clearInterval(interval);
+        if(cls){ span.innerHTML = label + '<span class="'+cls+'">'+cls.toUpperCase()+'</span>'; }
+        i++;
+        setTimeout(typeLine, 90);
+      }
+    }, 14);
+  }
+  typeLine();
+})();
+</script>
+
+</body>
+</html>
