@@ -7,7 +7,7 @@
 <meta name="description" content="Ziyi (Roy) Zhao, Firmware Design Developer in Vancouver, BC. UEFI/BIOS firmware for x86 and ARM platforms.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Sans+SC:wght@600&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0A0E12;
@@ -54,6 +54,18 @@
     font-size:clamp(28px,5vw,42px);
     margin:6px 0 4px;
     letter-spacing:-0.01em;
+    display:flex;
+    align-items:baseline;
+    flex-wrap:wrap;
+    row-gap:2px;
+  }
+  h1 .name-zh{
+    font-family:'Noto Sans SC', var(--sans);
+    font-weight:600;
+    font-size:0.62em;
+    letter-spacing:.06em;
+    color:var(--text-dim);
+    margin-left:22px;
   }
   .role{
     font-family:var(--mono);
@@ -218,7 +230,7 @@
     <div class="plate-id">DEV/ZIYI-ZHAO &nbsp;·&nbsp; REV 2026.1</div>
     <div class="plate-row">
       <div>
-        <h1>Ziyi (Roy) Zhao</h1>
+        <h1><span class="name-en">Ziyi (Roy) Zhao</span><span class="name-zh">赵 子毅</span></h1>
         <div class="role">FIRMWARE DESIGN DEVELOPER</div>
       </div>
     </div>
