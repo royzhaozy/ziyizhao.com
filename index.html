@@ -87,6 +87,8 @@
   #boot .warn{color:var(--accent-2);}
   #boot .cursor{display:inline-block; width:8px; background:var(--accent); margin-left:2px; animation:blink 1s steps(1) infinite;}
   @keyframes blink{50%{opacity:0;}}
+  #boot .breathe{color:var(--accent); animation:breathe 2.8s ease-in-out infinite;}
+  @keyframes breathe{0%,100%{opacity:1;}50%{opacity:.35;}}
 
   /* ---------- section scaffolding ---------- */
   section{padding:40px 0; border-bottom:1px solid var(--line);}
@@ -344,7 +346,7 @@
     ['EXPERIENCE .. ', 'ok'],
     ['PROJECTS .... ', 'ok'],
     ['', ''],
-    ['BOOT COMPLETE — WELCOME', 'warn']
+    ['BOOT COMPLETE — ', 'breathe-word']
   ];
 
   if(reduce){
@@ -360,16 +362,21 @@
     }
     var label = lines[i][0];
     var cls = lines[i][1];
+    var isSuffix = (cls === 'ok' || cls === 'warn');
     var span = document.createElement('div');
     boot.appendChild(span);
-    var text = label + (cls ? cls.toUpperCase() : '');
+    var text = label + (isSuffix ? cls.toUpperCase() : '');
     var j = 0;
     var interval = setInterval(function(){
       span.textContent = text.slice(0, j+1);
       j++;
       if(j >= text.length){
         clearInterval(interval);
-        if(cls){ span.innerHTML = label + '<span class="'+cls+'">'+cls.toUpperCase()+'</span>'; }
+        if(isSuffix){
+          span.innerHTML = label + '<span class="'+cls+'">'+cls.toUpperCase()+'</span>';
+        } else if(cls === 'breathe-word'){
+          span.innerHTML = label + '<span class="breathe">WELCOME</span>';
+        }
         i++;
         setTimeout(typeLine, 90);
       }
